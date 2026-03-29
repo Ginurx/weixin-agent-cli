@@ -107,6 +107,26 @@ weixin-agent-cli poll --account "bot1@im.bot"
 weixin-agent-cli send --to "user@im.wechat" --text "你好" --account "bot1@im.bot"
 ```
 
+## 环境变量
+
+| 变量 | 说明 |
+|---|---|
+| `WEIXIN_AGENT_CLI_HOME` | 自定义数据目录（默认 `~/.weixin-agent-cli/`） |
+| `WEIXIN_AGENT_CLI_ACCOUNT` | 默认 bot 账号 ID（替代 `-a <id>`） |
+| `WEIXIN_AGENT_CLI_TO` | 默认目标用户 ID（替代 `--to <userId>`） |
+
+设置后可以省略命令行参数：
+
+```bash
+export WEIXIN_AGENT_CLI_ACCOUNT="bot@im.bot"
+export WEIXIN_AGENT_CLI_TO="user456@im.wechat"
+
+weixin-agent-cli send --text "你好！"
+weixin-agent-cli typing
+```
+
+命令行参数始终优先于环境变量。
+
 ## 典型 Agent 循环
 
 **单次轮询：**

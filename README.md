@@ -71,6 +71,26 @@ Send or cancel a typing indicator.
 
 If only one account is registered, it's used automatically. With multiple accounts, specify `--account <id>` (or `-a <id>`).
 
+## Environment Variables
+
+| Variable                   | Description                                                  |
+| -------------------------- | ------------------------------------------------------------ |
+| `WEIXIN_AGENT_CLI_HOME`    | Override the default data directory (`~/.weixin-agent-cli/`) |
+| `WEIXIN_AGENT_CLI_ACCOUNT` | Default bot account ID (replaces `-a <id>`)                  |
+| `WEIXIN_AGENT_CLI_TO`      | Default recipient user ID (replaces `--to <userId>`)         |
+
+With these set, commands become much shorter:
+
+```bash
+export WEIXIN_AGENT_CLI_ACCOUNT="bot@im.bot"
+export WEIXIN_AGENT_CLI_TO="user456@im.wechat"
+
+weixin-agent-cli send --text "Hello!"
+weixin-agent-cli typing
+```
+
+Command-line flags always take precedence over environment variables.
+
 ## Data Storage
 
 Account credentials and state are stored in `~/.weixin-agent-cli/`. Override with the `WEIXIN_AGENT_CLI_HOME` environment variable.

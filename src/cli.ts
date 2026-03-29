@@ -36,11 +36,20 @@ function die(message: string): never {
 
 function getAccountId(opts: { account?: string }): string {
   if (opts.account) return opts.account;
+  const envAccount = process.env.WEIXIN_AGENT_CLI_ACCOUNT?.trim();
+  if (envAccount) return envAccount;
   try {
     return resolveDefaultAccountId();
   } catch (err) {
     die((err as Error).message);
   }
+}
+
+function getRecipientId(opts: { to?: string }): string {
+  if (opts.to) return opts.to;
+  const envTo = process.env.WEIXIN_AGENT_CLI_TO?.trim();
+  if (envTo) return envTo;
+  die("Recipient is required. Use --to <userId> or set WEIXIN_AGENT_CLI_TO.");
 }
 
 function ensureConfigured(accountId: string) {
@@ -448,7 +457,7 @@ program
     "Requires a context token for the recipient, which is cached automatically\n" +
     "when you receive a message from that user via 'poll'."
   )
-  .requiredOption("--to <userId>", "Recipient user ID (e.g. user456@im.wechat)")
+  .option("--to <userId>", "Recipient user ID (falls back to WEIXIN_AGENT_CLI_TO env var)")
   .requiredOption("--text <message>", "Message text to send")
   .option("-a, --account <id>", "Account ID (auto-detected if only one account exists)")
   .addHelpText(
@@ -463,15 +472,16 @@ Notes:
   - If no context token is found, the command will still attempt to send but may fail.
 `,
   )
-  .action(async (opts: { to: string; text: string; account?: string }) => {
+  .action(async (opts: { to?: string; text: string; account?: string }) => {
+    const to = getRecipientId(opts);
     const accountId = getAccountId(opts);
     const acct = ensureConfigured(accountId);
 
     restoreContextTokens(accountId);
-    const contextToken = getContextToken(accountId, opts.to);
+    const contextToken = getContextToken(accountId, to);
 
     const result = await sendTextMessage({
-      to: opts.to,
+      to,
       text: opts.text,
       opts: {
         baseUrl: acct.baseUrl,
@@ -483,7 +493,7 @@ Notes:
     jsonOut({
       success: true,
       accountId,
-      to: opts.to,
+      to,
       messageId: result.messageId,
     });
   });
@@ -499,7 +509,7 @@ program
     "  Files:  pdf, doc/docx, xls/xlsx, ppt/pptx, txt, csv, zip, tar, gz\n" +
     "Requires a cached context token (run 'poll' first)."
   )
-  .requiredOption("--to <userId>", "Recipient user ID (e.g. user456@im.wechat)")
+  .option("--to <userId>", "Recipient user ID (falls back to WEIXIN_AGENT_CLI_TO env var)")
   .requiredOption("--file <path>", "Absolute or relative path to the file to send")
   .option("--text <caption>", "Optional text caption sent alongside the file", "")
   .option("-a, --account <id>", "Account ID (auto-detected if only one account exists)")
@@ -512,16 +522,17 @@ Example:
   $ weixin-agent-cli send-media --to "user@im.wechat" --file ./report.pdf
 `,
   )
-  .action(async (opts: { to: string; file: string; text: string; account?: string }) => {
+  .action(async (opts: { to?: string; file: string; text: string; account?: string }) => {
+    const to = getRecipientId(opts);
     const accountId = getAccountId(opts);
     const acct = ensureConfigured(accountId);
 
     restoreContextTokens(accountId);
-    const contextToken = getContextToken(accountId, opts.to);
+    const contextToken = getContextToken(accountId, to);
 
     const result = await sendMediaFile({
       filePath: opts.file,
-      to: opts.to,
+      to,
       text: opts.text,
       opts: {
         baseUrl: acct.baseUrl,
@@ -534,7 +545,7 @@ Example:
     jsonOut({
       success: true,
       accountId,
-      to: opts.to,
+      to,
       messageId: result.messageId,
     });
   });
@@ -546,7 +557,7 @@ program
     "Send a typing indicator to show the bot is composing a response.\n" +
     "Use --cancel to stop the typing indicator. Requires a cached context token."
   )
-  .requiredOption("--to <userId>", "Recipient user ID (e.g. user456@im.wechat)")
+  .option("--to <userId>", "Recipient user ID (falls back to WEIXIN_AGENT_CLI_TO env var)")
   .option("--cancel", "Cancel the typing indicator instead of starting it", false)
   .option("-a, --account <id>", "Account ID (auto-detected if only one account exists)")
   .addHelpText(
@@ -557,18 +568,19 @@ Example:
   $ weixin-agent-cli typing --to "user@im.wechat" --cancel # stop typing
 `,
   )
-  .action(async (opts: { to: string; cancel: boolean; account?: string }) => {
+  .action(async (opts: { to?: string; cancel: boolean; account?: string }) => {
+    const to = getRecipientId(opts);
     const accountId = getAccountId(opts);
     const acct = ensureConfigured(accountId);
 
     restoreContextTokens(accountId);
-    const contextToken = getContextToken(accountId, opts.to);
+    const contextToken = getContextToken(accountId, to);
 
     // Get typing ticket
     const config = await getConfig({
       baseUrl: acct.baseUrl,
       token: acct.token,
-      ilinkUserId: opts.to,
+      ilinkUserId: to,
       contextToken,
     });
 
@@ -580,7 +592,7 @@ Example:
       baseUrl: acct.baseUrl,
       token: acct.token,
       body: {
-        ilink_user_id: opts.to,
+        ilink_user_id: to,
         typing_ticket: config.typing_ticket,
         status: opts.cancel ? TypingStatus.CANCEL : TypingStatus.TYPING,
       },
@@ -589,7 +601,7 @@ Example:
     jsonOut({
       success: true,
       accountId,
-      to: opts.to,
+      to,
       status: opts.cancel ? "cancelled" : "typing",
     });
   });
