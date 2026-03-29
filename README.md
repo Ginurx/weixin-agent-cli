@@ -6,10 +6,14 @@ CLI tool for WeChat (微信) messaging, built on top of the [openclaw-weixin](ht
 
 ## Installation
 
+> **Note:** This package is not yet published to npm. Install directly from the repository:
+
 ```bash
-npm install -g weixin-agent-cli
-# or use locally
-npx weixin-agent-cli
+git clone https://github.com/Ginurx/weixin-agent-cli.git
+cd weixin-agent-cli
+npm install
+npm run build
+npm install -g .
 ```
 
 Requires Node.js >= 22.

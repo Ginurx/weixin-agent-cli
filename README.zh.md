@@ -4,10 +4,14 @@
 
 ## 安装
 
+> **注意：** 本包尚未发布到 npm，请直接从仓库安装：
+
 ```bash
-npm install -g weixin-agent-cli
-# 或直接使用
-npx weixin-agent-cli
+git clone https://github.com/Ginurx/weixin-agent-cli.git
+cd weixin-agent-cli
+npm install
+npm run build
+npm install -g .
 ```
 
 需要 Node.js >= 22。
