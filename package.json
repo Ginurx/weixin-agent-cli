@@ -1,0 +1,30 @@
+{
+    "name": "weixin-agent-cli",
+    "version": "0.1.0",
+    "description": "🤖 WeChat messaging CLI for AI agents, based on openclaw-weixin — poll, send & watch. JSON output. | 基于 openclaw-weixin，专为 AI Agent 设计的微信消息命令行工具",
+    "license": "MIT",
+    "type": "module",
+    "bin": {
+        "weixin-agent-cli": "./bin/weixin-agent-cli.js"
+    },
+    "files": [
+        "dist/",
+        "bin/"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "prepublishOnly": "npm run build"
+    },
+    "engines": {
+        "node": ">=22"
+    },
+    "dependencies": {
+        "commander": "^13.1.0",
+        "qrcode-terminal": "^0.12.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.0.0",
+        "@types/qrcode-terminal": "^0.12.0",
+        "typescript": "^5.8.0"
+    }
+}
